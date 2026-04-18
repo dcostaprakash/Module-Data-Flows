@@ -1,4 +1,4 @@
-let myLibrary = [];
+const myLibrary = [];
 
 const titleInput = document.getElementById("title");
 const authorInput = document.getElementById("author");
@@ -27,27 +27,28 @@ function populateStorage() {
 //check the right input from forms and if its ok -> add the new book (object in array)
 //via Book function and start render function
 function submit() {
-  if (
-    titleInput.value.trim() === "" ||
-    authorInput.value.trim() === "" ||
-    pagesInput.value.trim() === ""
-  ) {
+  const title = titleInput.value.trim();
+  const author = authorInput.value.trim();
+  const pages = Number(pagesInput.value);
+  const isRead = readCheckbox.checked;
+
+  if (title === "" || author === "") {
     alert("Please fill all fields!");
     return;
-  } else {
-    let book = new Book(
-      titleInput.value,
-      authorInput.value,
-      Number(pagesInput.value),
-      readCheckbox.checked
-    );
-    myLibrary.push(book);
-    render();
-    titleInput.value = "";
-    authorInput.value = "";
-    pagesInput.value = "";
-    readCheckbox.checked = false;
   }
+
+  if (!Number.isInteger(pages) || pages <= 0 || pages > 9999) {
+    alert("Please enter a valid page count (1–9999).");
+    return;
+  }
+
+  let book = new Book(title, author, pages, isRead);
+  myLibrary.push(book);
+  render();
+  titleInput.value = "";
+  authorInput.value = "";
+  pagesInput.value = "";
+  readCheckbox.checked = false;
 }
 
 function Book(title, author, pages, check) {
@@ -58,16 +59,13 @@ function Book(title, author, pages, check) {
 }
 
 function render() {
-  let table = document.getElementById("display");
-  let rowsNumber = table.rows.length;
-  //delete old table
-  for (let n = rowsNumber - 1; n > 0; n--) {
-    table.deleteRow(n);
-  }
+  const tbody = document.querySelector("#display tbody");
+  tbody.innerHTML = "";
+
   //insert updated row and cells
   let length = myLibrary.length;
   for (let i = 0; i < length; i++) {
-    let row = table.insertRow(1);
+    let row = tbody.insertRow();
     let titleCell = row.insertCell(0);
     let authorCell = row.insertCell(1);
     let pagesCell = row.insertCell(2);
@@ -95,9 +93,11 @@ function render() {
     deleteButton.className = "btn btn-warning";
     deleteButton.innerHTML = "Delete";
     deleteButton.addEventListener("click", function () {
-      alert(`You've deleted title: ${myLibrary[i].title}`);
-      myLibrary.splice(i, 1);
+      const book = myLibrary[i];
+      const deletedTitle = book.title;
+      myLibrary.splice(myLibrary.indexOf(book), 1);
       render();
+      alert(`You've deleted title: ${deletedTitle}`);
     });
   }
 }
